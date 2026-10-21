@@ -31,6 +31,9 @@ function App() {
   const [modalAgregarVisible, setAgregarModalVisible] = useState(false)
   const [modalEditarVisible, setEditarModalVisible] = useState(false)
 
+
+  const [filtro, setFiltro] = useState("todo")
+
   // Obtiene el JSON con las misiones en formato js
   async function fetchMisiones() {
 
@@ -179,22 +182,25 @@ function App() {
       </div>
       <div className="main">
         <div className="superior">
-          <button onClick="">FILTRO 1</button>
-          <button onClick="">FILTRO 2</button>
-          <button onClick="">FILTRO 3</button>
+          <button onClick={()=> setFiltro("todo")}>Todos</button>
+          <button onClick={()=>setFiltro("pendiente")}>Pendientes</button>
+          <button onClick={()=>setFiltro("completada")}>Completadas</button>
           <div className="linea-superior"></div>
         </div>
 
         <div className="inferior">
           <div className="inferior-izquierda">
-            <QuestBar misiones={misiones} onCargarMision={cargarMision}></QuestBar>
+            <QuestBar misiones={misiones} onCargarMision={cargarMision} filtro={filtro}></QuestBar>
           </div>
           <div className="inferior-derecha">
             {misiones.findIndex(mision => mision.id === misionMostrar) !== -1 ?
               <QuestMenu
                 mision={misiones[misiones.findIndex(mision => mision.id === misionMostrar)]}
                 onEliminar={eliminarMision}
-                onEditar={abrirModalEditar}>
+                onEditar={abrirModalEditar}
+                onCompletar={completarMision}
+                onDescompletar={descompletarMision}
+                >
               </QuestMenu> : null}
             <div className="boton-agregar">
               <button button className='agregar' onClick={() => setAgregarModalVisible(true)}>Agregar</button>

@@ -20,6 +20,7 @@ let misiones = JSON.parse(await readFile(archivoMisiones, "utf-8"));
 
 async function guardarMisiones() {
     await writeFile(archivoMisiones, JSON.stringify(misiones, null, 2), "utf-8")
+    console.log("Misiones guardadas en el archivo")
 }
 // Obtiene la lista completa de misiones
 app.get("/API/misiones", (req, res) => {
@@ -95,9 +96,9 @@ app.put("/API/misiones/:id", async (req,res) =>{
 
 app.patch("/API/misiones/completar/:id", async (req, res) => {
     try{
-        console.log("Se ha recibido una solicitud para completar una misión");
+        console.log(`Se ha recibido una solicitud para completar una misión con id ${req.params.id}`);
         const id =  parseInt(req.params.id);
-
+        
         // Verufica si la id para editar existe
         if(misiones.findIndex(mision=> mision.id === id) === -1){
             return res.status(400).json({error:"ID No encontrada"})
@@ -105,7 +106,7 @@ app.patch("/API/misiones/completar/:id", async (req, res) => {
 
         // Modifica una mision para que cambie de estado
         misiones = misiones.map(mision => {
-            if(mision.ID === parseInt(id)){
+            if(mision.id === id){
                 return {...mision, estado: "completada"}
             }
             return mision
@@ -131,7 +132,7 @@ app.patch("/API/misiones/descompletar/:id", async (req, res) => {
 
         // Modifica una mision para cambiar su estado
         misiones = misiones.map(mision => {
-            if(mision.ID === parseInt(id)){
+            if(mision.id === id){
                 return {...mision, estado: "pendiente"}
             }
             return mision
@@ -145,7 +146,7 @@ app.patch("/API/misiones/descompletar/:id", async (req, res) => {
 })
 
 
-// Prueba de conexion
+// Inicia el servidor en el puerto 3000
 app.listen(3000, () => {
     console.log("Servidor escuchando en el puerto 3000");
 });

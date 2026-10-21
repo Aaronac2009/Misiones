@@ -1,6 +1,6 @@
 import logo from "../assets/Imagen mision generica.jpg"
 
-function QuestMenu({mision, onEliminar, onEditar}){
+function QuestMenu({mision, onEliminar, onEditar, onCompletar, onDescompletar}){
     return(
         <div className="QuestMenu">
             <div className="logo">
@@ -8,6 +8,10 @@ function QuestMenu({mision, onEliminar, onEditar}){
             </div>
             <div className="quest-text">
                 <div className="buttons">
+                    {mision.estado !== "completada" ? 
+                        <button className="completar" onClick={() => onCompletar(mision.id)}>Completar</button>:
+                        <button className="completar" onClick={() => onDescompletar(mision.id)}>Descompletar</button>
+                    }
                     <button className="completar" onClick={() => onEditar(mision.id)}>Editar</button>
                     <button className="eliminar" onClick={() => onEliminar(mision.id)}>Eliminar</button>
                 </div>
