@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'
 import './App.css'
 
 // Componentes
 import AgregarModal from './components/agregarModal'
+import EditarModal from './components/editarModal'
 import QuestBar from './components/QuestBar'
 import QuestMenu from './components/QuestMenu'
-
 //App
 function App() {
   // Se obtiene desde el backend
@@ -18,6 +18,8 @@ function App() {
   const [misionEliminada, setMisionEliminada] = useState("")
 
 
+  const [misionEditar, setMisionEditar] = useState(0)
+
   // Identifican la ID de una mision que va a cambiar de estado
   const [misionCompletada, setMisionCompletada] = useState("")
   const [misionDescompletada, setMisionDescompletada] = useState("")
@@ -27,6 +29,7 @@ function App() {
 
   // Modals estado
   const [modalAgregarVisible, setAgregarModalVisible] = useState(false)
+  const [modalEditarVisible, setEditarModalVisible] = useState(false)
 
   // Obtiene el JSON con las misiones en formato js
   async function fetchMisiones() {
@@ -52,18 +55,19 @@ function App() {
 
   async function enviarMision() {
     try {
-      const id = misiones.length > 0 ? misiones[misiones.length-1].id + 1 : 0
+      const id = misiones.length > 0 ? misiones[misiones.length - 1].id + 1 : 0
       const respuesta = await fetch("http://localhost:3000/API/misiones", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ 
-          id: id, 
+        body: JSON.stringify({
+          id: id,
           nombre: nuevaMision.nombre,
-          descripcion: nuevaMision.descripcion, 
-          estado: "pendiente", 
-          dificultad: nuevaMision.dificultad })
+          descripcion: nuevaMision.descripcion,
+          estado: "pendiente",
+          dificultad: nuevaMision.dificultad
+        })
       })
       if (!respuesta.ok) {
         throw new Error(`Error al enviar la misión: ${respuesta.status}`)
@@ -95,10 +99,32 @@ function App() {
     }
   }
 
+  async function editarMision(id, misionEditada) {
+    console.log("Entre a funcion")
+    try {
+      const respuesta = await fetch(`http://localhost:3000/API/misiones/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(misionEditada)
+      })
+      if(!respuesta.ok){
+        throw new Error("La rata que corre el servidor fallecio")
+      }
+      const datos = await respuesta.json()
+      setMisiones(datos)
+      setEditarModalVisible(false)
+    }
+    catch (error) {
+      console.log(error)
+    }
+  }
+
   async function completarMision(id) {
     try {
       const respuesta = await fetch(`http://localhost:3000/API/misiones/completar/${id}`, {
-        method: "PUT"
+        method: "PATCH"
       })
       if (!respuesta.ok) {
         throw new Error(`Error al completar la misión: ${respuesta.status}`)
@@ -114,7 +140,7 @@ function App() {
   async function descompletarMision(id) {
     try {
       const respuesta = await fetch(`http://localhost:3000/API/misiones/descompletar/${id}`, {
-        method: "PUT"
+        method: "PATCH"
       })
       if (!respuesta.ok) {
         throw new Error(`Error al completar la misión: ${respuesta.status}`)
@@ -133,6 +159,11 @@ function App() {
   }
 
 
+  function abrirModalEditar(id){
+    setEditarModalVisible(true)
+    setMisionEditar(id)
+  }
+
   // Actualiza la lista de misiones al cargar el componente
 
   useEffect(() => { fetchMisiones() }, [])
@@ -142,7 +173,7 @@ function App() {
     <div className="app">
       <div className="header">
         <h1>QuestLog</h1>
-        <p> Mision:  {misionMostrar}</p>
+        <p> Mision:  {misionEditar}</p>
         <div className="linea"></div>
         <p>Gestion en tiempo real de misiones</p>
       </div>
@@ -162,7 +193,8 @@ function App() {
             {misiones.findIndex(mision => mision.id === misionMostrar) !== -1 ?
               <QuestMenu
                 mision={misiones[misiones.findIndex(mision => mision.id === misionMostrar)]}
-                onEliminar={eliminarMision}>
+                onEliminar={eliminarMision}
+                onEditar={abrirModalEditar}>
               </QuestMenu> : null}
             <div className="boton-agregar">
               <button button className='agregar' onClick={() => setAgregarModalVisible(true)}>Agregar</button>
@@ -180,6 +212,16 @@ function App() {
           funcionAgregarMision={enviarMision}
           funcionCerrarModal={() => setAgregarModalVisible(false)}>
         </AgregarModal> : null}
+
+      {modalEditarVisible ?
+        <EditarModal className="modal-agregar"
+          mision={misiones[misiones.findIndex(mision => mision.id === misionEditar)]}
+          funcionEditarMision={editarMision}
+          funcionCerrarModal={() => setEditarModalVisible(false)}>
+        </EditarModal> : null}
+
+
+
 
     </div>
   )

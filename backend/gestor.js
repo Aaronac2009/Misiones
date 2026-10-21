@@ -72,8 +72,28 @@ app.delete("/API/misiones/:id", async (req, res) => {
     }
 })
 
+app.put("/API/misiones/:id", async (req,res) =>{
+    try{
+        console.log("Se ha recibido una solicitud para editar una mision")
+        const id = parseInt(req.params.id)
+        const tareaEditar = req.body
+        
+        if(misiones.findIndex(mision=> mision.id === id) === -1){
+            return res.status(400).json({error:"ID No encontrada"})
+        }
 
-app.put("/API/misiones/completar/:id", async (req, res) => {
+        misiones[misiones.findIndex(mision => mision.id===id)] = tareaEditar
+        await guardarMisiones()
+        res.json(misiones);
+    }
+    catch{
+        console.log(error)
+        return res.status(500).json({error:"Error interno del servidor"})
+    }
+})
+
+
+app.patch("/API/misiones/completar/:id", async (req, res) => {
     try{
         console.log("Se ha recibido una solicitud para completar una misión");
         const id =  parseInt(req.params.id);
@@ -99,7 +119,7 @@ app.put("/API/misiones/completar/:id", async (req, res) => {
     }
 })
 
-app.put("/API/misiones/descompletar/:id", async (req, res) => {
+app.patch("/API/misiones/descompletar/:id", async (req, res) => {
     try{
         console.log("Se ha recibido una solicitud para descompletar una misión");
         const id =  parseInt(req.params.id);
